@@ -26,7 +26,10 @@ HEADERS  += widget.h
 
 FORMS    += widget.ui
 
-OTHER_FILES +=
+win32:RC_FILE = StopWatch.rc
+
+OTHER_FILES += \
+    StopWatch.rc
 
 RESOURCES += \
     resources.qrc
