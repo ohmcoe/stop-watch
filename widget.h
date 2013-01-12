@@ -31,6 +31,8 @@ private:
     bool isStarted;
     bool isPaused;
     unsigned int lap;
+    unsigned int pauseCount;
+    unsigned int totalPauseCount;
     void inline appendLog(const QString &log);
 
 };

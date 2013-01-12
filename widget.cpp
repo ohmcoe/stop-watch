@@ -11,6 +11,8 @@ Widget::Widget(QWidget *parent) :
     isStarted = false;
     isPaused = false;
     lap = 0;
+    pauseCount = 0;
+    totalPauseCount = 0;
 
     // Construct new objects
     sw = new StopWatch(0);
@@ -34,6 +36,9 @@ void Widget::start()
 {
     if (!isStarted)
     {
+        // Clear the log
+        ui->txtLog->clear();
+
         // Log the start event
         appendLog("Started");
 
@@ -42,8 +47,10 @@ void Widget::start()
         ui->btnStop->setEnabled(true);
         ui->btnSplit->setEnabled(true);
 
-        // Reset the lap counter
+        // Reset the counters
         lap = 0;
+        pauseCount = 0;
+        totalPauseCount = 0;
 
         // Flag as started
         isStarted = true;
@@ -55,6 +62,9 @@ void Widget::start()
     {
         // Pause the time ASAP
         sw->pause();
+
+        // Increment the pause count
+        pauseCount++;
 
         // Log the pause event
         appendLog("Paused");
@@ -84,17 +94,35 @@ void Widget::start()
 
 void Widget::stop()
 {
+    QString log;
+
+    // Trig the stop of StopWatch ASAP
     sw->stop();
 
+    // Only one lap
     if (lap < 1)
-        appendLog("Stopped: " + sw->getOverallTime());
-    else
-        appendLog("Last Lap: " + sw->getOverallTime() + " (+" + sw->getCurrentLapTime() + ")");
+        log = "Stopped: " + sw->getOverallTime();
 
+    // Multi-laps
+    else
+        log = "Last Lap: " + sw->getOverallTime() + " (+" + sw->getCurrentLapTime() + ")";
+
+    // Log the pause count (if available)
+    if (pauseCount > 0)
+        log += " with " + QString::number(pauseCount) + " pauses";
+
+    appendLog(log);
+
+    // Display the total pause count (if available)
+    if (totalPauseCount > 0)
+        appendLog("Total pauses: " + QString::number(totalPauseCount));
+
+    // Configure UI
     ui->btnStart->setText("Start");
     ui->btnStop->setEnabled(false);
     ui->btnSplit->setEnabled(false);
 
+    // Reset the started flag
     isStarted = false;
 }
 
@@ -102,6 +130,7 @@ void Widget::split()
 {
     QString overallTime;
     QString currentLapTime;
+    QString log;
 
     // Save the overallTime
     overallTime = sw->getOverallTime();
@@ -116,7 +145,19 @@ void Widget::split()
     lap++;
 
     // Log the overall time and lap time
-    appendLog("Lap " + QString::number(lap) + ": " + overallTime + " (+" + currentLapTime + ")");
+    log = "Lap " + QString::number(lap) + ": " + overallTime + " (+" + currentLapTime + ")";
+
+    // Log the pause count (if available)
+    if (pauseCount > 0)
+        log += " with " + QString::number(pauseCount) + " pauses";
+
+    // Accumulate pause count
+    totalPauseCount += pauseCount;
+
+    // Reset pause counter
+    pauseCount = 0;
+
+    appendLog(log);
 }
 
 void Widget::refresh()
