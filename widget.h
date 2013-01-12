@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTime>
 #include <QTimer>
+#include "stopwatch.h"
 
 namespace Ui {
 class Widget;
@@ -25,12 +26,12 @@ private slots:
 
 private:
     Ui::Widget *ui;
-    QTime *time;
-    QTimer *timer;
+    StopWatch *sw;
     QTimer *refresher;
+    bool isStarted;
+    bool isPaused;
     unsigned int lap;
-    int lastLapElapsed;
-    QString *fromMs(int ms);
+    void inline appendLog(const QString &log);
 
 };
 

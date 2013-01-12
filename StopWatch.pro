@@ -20,13 +20,16 @@ static{
 }
 
 SOURCES += main.cpp\
-        widget.cpp
+        widget.cpp \
+    stopwatch.cpp
 
-HEADERS  += widget.h
+HEADERS  += widget.h \
+    stopwatch.h \
+    version.h
 
 FORMS    += widget.ui
 
-win32:RC_FILE = StopWatch.rc
+RC_FILE = StopWatch.rc
 
 OTHER_FILES += \
     StopWatch.rc
