@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Stop Watch</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/stop_watch_icon.ico</normaloff>:/stop_watch_icon.ico</iconset>
+  </property>
   <widget class="QLCDNumber" name="lcdTime">
    <property name="geometry">
     <rect>
@@ -82,7 +86,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>

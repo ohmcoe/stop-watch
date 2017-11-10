@@ -7,154 +7,172 @@ Widget::Widget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Initial new time object
-    time = new QTime();
+    // Variable Default
+    isStarted = false;
+    isPaused = false;
+    lap = 0;
+    pauseCount = 0;
+    totalPauseCount = 0;
 
-    // Initial display refresher
-    refresher = new QTimer(this);
-    connect(refresher, SIGNAL(timeout()), this, SLOT(refresh()));
+    // Construct new objects
+    sw = new StopWatch(0);
+    refresher = new QTimer(0);
 
-    // Reset the display
-    ui->lcdTime->display("00:00.000");
+    // Disable UI components
+    ui->btnStop->setEnabled(false);
+    ui->btnSplit->setEnabled(false);
 
-    // Connect the UI components to our slots
+    // Connect the signal slot
     connect(ui->btnStart, SIGNAL(clicked()), this, SLOT(start()));
     connect(ui->btnStop, SIGNAL(clicked()), this, SLOT(stop()));
     connect(ui->btnSplit, SIGNAL(clicked()), this, SLOT(split()));
+    connect(refresher, SIGNAL(timeout()), this, SLOT(refresh()));
 
-    // Stop the refresher
-    refresher->stop();
+    // Start display refresher
+    refresher->start(1);
 }
 
 void Widget::start()
 {
-    // Reset lap counter
-    lap = 0;
+    if (!isStarted)
+    {
+        // Clear the log
+        ui->txtLog->clear();
 
-    // Clear Log
-    ui->txtLog->clear();
+        // Log the start event
+        appendLog("Started");
 
-    // Log the start time
-    ui->txtLog->append("Start");
+        // Configure the UI
+        ui->btnStart->setText("Pause");
+        ui->btnStop->setEnabled(true);
+        ui->btnSplit->setEnabled(true);
 
-    // Restart the time
-    time->restart();
+        // Reset the counters
+        lap = 0;
+        pauseCount = 0;
+        totalPauseCount = 0;
 
-    // Start display refresher
-    refresher->start();
+        // Flag as started
+        isStarted = true;
+
+        // GO !!
+        sw->start();
+    }
+    else if (!isPaused)
+    {
+        // Pause the time ASAP
+        sw->pause();
+
+        // Increment the pause count
+        pauseCount++;
+
+        // Log the pause event
+        appendLog("Paused");
+
+        // Configure the UI
+        ui->btnStart->setText("Unpause");
+        ui->btnStop->setEnabled(false);
+        ui->btnSplit->setEnabled(false);
+
+        // Flag as paused
+        isPaused = true;
+    }
+    else
+    {
+        // Unpause
+        sw->unpause();
+
+        // Configure the UI
+        ui->btnStart->setText("Pause");
+        ui->btnStop->setEnabled(true);
+        ui->btnSplit->setEnabled(true);
+
+        // Flag as not paused
+        isPaused = false;
+    }
 }
 
 void Widget::stop()
 {
-    QString *overallTime = NULL;
-    QString *elapsedTime = NULL;
+    QString log;
 
-    // Save the elapsed time as fast as possible
-    int overall = time->elapsed();
+    // Trig the stop of StopWatch ASAP
+    sw->stop();
 
-    // Calculate the elapsed time
-    overallTime = fromMs(overall);
+    // Only one lap
+    if (lap < 1)
+        log = "Stopped: " + sw->getOverallTime();
 
-    // Stop the timer
-    refresher->stop();
-
-    // Increment the lap counter
-    lap++;
-
-    if (lap > 1)
-    {
-        // Log the lap's elapsed time
-        elapsedTime = fromMs(overall - lastLapElapsed);
-        ui->txtLog->append("Last Lap: " + *overallTime + " (+" + *elapsedTime + ")");
-
-        // TODO: Best Run
-        // TODO: Average Run
-    }
+    // Multi-laps
     else
-    {
-        // Log the stop time
-        ui->txtLog->append("Stop: " + *overallTime);
-    }
+        log = "Last Lap: " + sw->getOverallTime() + " (+" + sw->getCurrentLapTime() + ")";
 
-    // Collect garbage
-    if (overallTime != NULL)
-        delete overallTime;
-    if (elapsedTime != NULL)
-        delete elapsedTime;
+    // Log the pause count (if available)
+    if (pauseCount > 0)
+        log += " with " + QString::number(pauseCount) + " pauses";
+
+    appendLog(log);
+
+    // Display the total pause count (if available)
+    if (totalPauseCount > 0)
+        appendLog("Total pauses: " + QString::number(totalPauseCount));
+
+    // Configure UI
+    ui->btnStart->setText("Start");
+    ui->btnStop->setEnabled(false);
+    ui->btnSplit->setEnabled(false);
+
+    // Reset the started flag
+    isStarted = false;
 }
 
 void Widget::split()
 {
-    QString *overallTime = NULL;
-    QString *elapsedTime = NULL;
+    QString overallTime;
+    QString currentLapTime;
+    QString log;
 
-    // Save the elapsed time as fast as possible
-    int overall = time->elapsed();
+    // Save the overallTime
+    overallTime = sw->getOverallTime();
+
+    // Split
+    sw->split();
+
+    // Get the last lap time
+    currentLapTime = sw->getLapTime(lap);
 
     // Increment the lap counter
     lap++;
 
-    // Create a log line
-    QString log;
-    log = "Lap " + QString::number(lap) + ": ";
+    // Log the overall time and lap time
+    log = "Lap " + QString::number(lap) + ": " + overallTime + " (+" + currentLapTime + ")";
 
-    // Log the overall time
-    overallTime = fromMs(overall);
-    log += *overallTime;
+    // Log the pause count (if available)
+    if (pauseCount > 0)
+        log += " with " + QString::number(pauseCount) + " pauses";
 
-    if (lap > 1)
-    {
-        // Log the lap's elapsed time
-        elapsedTime = fromMs(overall - lastLapElapsed);
-        log += " (+" + *elapsedTime + ")";
-    }
+    // Accumulate pause count
+    totalPauseCount += pauseCount;
 
-    // Display the log
-    ui->txtLog->append(log);
+    // Reset pause counter
+    pauseCount = 0;
 
-    // Save the lap's elapsed time
-    lastLapElapsed = overall;
-
-    // Collect Garbage
-    if (overallTime != NULL)
-        delete overallTime;
-    if (elapsedTime != NULL)
-        delete elapsedTime;
+    appendLog(log);
 }
 
 void Widget::refresh()
 {
-    QString *elapsedTime = NULL;
-
-    // Calculate the elapsed time
-    elapsedTime = fromMs(time->elapsed());
-
-    // Display
-    ui->lcdTime->display(*elapsedTime);
-
-    // Collect garbage
-    if (elapsedTime != NULL)
-        delete elapsedTime;
-}
-
-QString* Widget::fromMs(int ms)
-{
-    // Derive all time components from msecs
-    int s = ms / 1000; ms %= 1000;
-    int m = s / 60; s %= 60;
-
-    // Convert the time to formatted text
-    QString *elapsedTime;
-    elapsedTime = new QString();
-    elapsedTime->sprintf("%02d:%02d.%03d", m, s, ms);
-
-    return elapsedTime;
+    ui->lcdTime->display(sw->getOverallTime());
 }
 
 Widget::~Widget()
 {
-    // Time object has no parent, delete it
-    delete time;
-
+    delete sw;
+    delete refresher;
     delete ui;
+}
+
+void inline Widget::appendLog(const QString &log)
+{
+    ui->txtLog->append(log);
 }
