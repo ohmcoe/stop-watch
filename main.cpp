@@ -1,8 +1,5 @@
 #include "widget.h"
 #include <QApplication>
-#include <QtPlugin>
-
-Q_IMPORT_PLUGIN(qico)
 
 int main(int argc, char *argv[])
 {
