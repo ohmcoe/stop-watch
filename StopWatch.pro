@@ -12,14 +12,14 @@ TARGET = StopWatch
 TEMPLATE = app
 
 SOURCES += main.cpp\
-        widget.cpp \
+    widget.cpp \
     stopwatch.cpp
 
-HEADERS  += widget.h \
+HEADERS += widget.h \
     stopwatch.h \
     version.h
 
-FORMS    += widget.ui
+FORMS   += widget.ui
 
 RC_FILE = StopWatch.rc
 
