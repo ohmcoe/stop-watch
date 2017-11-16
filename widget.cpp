@@ -28,6 +28,14 @@ Widget::Widget(QWidget *parent) :
     connect(ui->btnSplit, SIGNAL(clicked()), this, SLOT(split()));
     connect(refresher, SIGNAL(timeout()), this, SLOT(refresh()));
 
+    // Add shortcut
+    startPauseShortcut = new QShortcut(QKeySequence("A"), this);
+    stopShortcut = new QShortcut(QKeySequence("S"), this);
+    splitShortcut = new QShortcut(QKeySequence("D"), this);
+    connect(startPauseShortcut, SIGNAL(activated()), ui->btnStart, SLOT(click()));
+    connect(stopShortcut, SIGNAL(activated()), ui->btnStop, SLOT(click()));
+    connect(splitShortcut, SIGNAL(activated()), ui->btnSplit, SLOT(click()));
+
     // Start display refresher
     refresher->start(1);
 }
@@ -121,6 +129,7 @@ void Widget::stop()
     ui->btnStart->setText("Start");
     ui->btnStop->setEnabled(false);
     ui->btnSplit->setEnabled(false);
+
 
     // Reset the started flag
     isStarted = false;

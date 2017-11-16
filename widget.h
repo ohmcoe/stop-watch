@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTime>
 #include <QTimer>
+#include <QShortcut>
 #include "stopwatch.h"
 
 namespace Ui {
@@ -28,6 +29,9 @@ private:
     Ui::Widget *ui;
     StopWatch *sw;
     QTimer *refresher;
+    QShortcut *startPauseShortcut;
+    QShortcut *stopShortcut;
+    QShortcut *splitShortcut;
     bool isStarted;
     bool isPaused;
     unsigned int lap;
