@@ -1,0 +1,4 @@
+Makefile*
+release
+stopwatch_plugin_import.cpp
+ui_widget.h

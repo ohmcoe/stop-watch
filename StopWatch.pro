@@ -11,23 +11,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = StopWatch
 TEMPLATE = app
 
-CONFIG += static
-static{
-    CONFIG += static
-    QTPLUGIN += qico
-    DEFINES += STATIC
-    message("Static build.")
-}
-
 SOURCES += main.cpp\
-        widget.cpp \
+    widget.cpp \
     stopwatch.cpp
 
-HEADERS  += widget.h \
+HEADERS += widget.h \
     stopwatch.h \
     version.h
 
-FORMS    += widget.ui
+FORMS   += \
+    widget.ui
 
 RC_FILE = StopWatch.rc
 
@@ -36,3 +29,5 @@ OTHER_FILES += \
 
 RESOURCES += \
     resources.qrc
+
+CONFIG += static staticlib
