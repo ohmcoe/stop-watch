@@ -19,7 +19,8 @@ HEADERS += widget.h \
     stopwatch.h \
     version.h
 
-FORMS   += widget.ui
+FORMS   += \
+    widget.ui
 
 RC_FILE = StopWatch.rc
 
